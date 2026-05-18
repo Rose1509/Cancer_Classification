@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OncoVision - Cancer Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-left">
+            <span class="logo">OncoVision</span>
+            <nav class="nav-links">
+                <a href="#" class="active">Analyze</a>
+            </nav>
+        </div>
+        <div class="nav-right">
+            <button class="btn-new-analysis" type="button" onclick="document.getElementById('image-input').click()">New Analysis</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+
+        <section class="title-section">
+            <h1>OncoVision Cancer Classifier</h1>
+            <p>Precision oncology diagnostics powered by deep learning. Select a specialized model and upload medical imaging for immediate clinical classification.</p>
+        </section>
+
+        <div id="error-box" class="error-box" hidden></div>
+
+        <form id="upload-form" class="dashboard-grid" enctype="multipart/form-data">
+
+            <aside class="model-selection">
+                <h2 class="section-title">
+                    <span class="title-icon">🗂️</span> Model Selection
+                </h2>
+
+                <div class="model-card{% if 'baseline' in loaded_models %}{% else %} disabled{% endif %}" data-model="baseline">
+                    <div class="card-header">
+                        <span class="badge badge-fastest">FASTEST</span>
+                    </div>
+                    <h3>Baseline Model</h3>
+                    <p>General classification for preliminary screening. Optimized for speed.</p>
+                </div>
+
+                <div class="model-card{% if 'improved' in loaded_models %}{% else %} disabled{% endif %}" data-model="improved">
+                    <div class="card-header">
+                        <span class="badge badge-accuracy">ACCURACY: 98.2%</span>
+                    </div>
+                    <h3>Improved CNN</h3>
+                    <p>Specialized architecture for dense feature extraction in soft tissue biopsies.</p>
+                </div>
+
+                <div class="model-card{% if 'resnet' in loaded_models %}{% else %} disabled{% endif %}" data-model="resnet">
+                    <div class="card-header">
+                        <span class="badge badge-robust">ROBUST</span>
+                    </div>
+                    <h3>ResNet-18</h3>
+                    <p>Residual network optimized for identifying deep structural patterns in tumor scans.</p>
+                </div>
+
+            </aside>
+
+            <section class="workspace">
+
+                <div id="dropzone" class="dropzone">
+                    <div class="dropzone-icon">📄</div>
+                    <h3>Drop medical scan here</h3>
+                    <p>Support for JPEG and PNG formats (Max 50MB)</p>
+                    <input type="file" id="image-input" name="image" accept="image/*" hidden>
+                    <button type="button" id="browse-btn" class="btn-browse">Browse Files</button>
+                </div>
+
+                <div class="results-panel">
+
+                    <div class="image-preview-container">
+                        <div class="panel-header">
+                            <span class="panel-label">IMAGE PREVIEW</span>
+                            <span id="scan-id" class="scan-id">ID: —</span>
+                        </div>
+                        <div id="image-wrapper" class="image-wrapper">
+                            <div id="preview-placeholder" class="medical-scan-placeholder">
+                                <span class="layer-tag">AWAITING UPLOAD</span>
+                            </div>
+                            <img id="preview-image" class="preview-image" alt="Uploaded scan preview" hidden>
+                            <div id="analyzing-overlay" hidden>
+                                <div class="analyzing-progress">
+                                    <div id="analyzing-progress-bar" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prediction-results-container">
+                        <div class="panel-header">
+                            <span class="panel-label">PREDICTION RESULTS</span>
+                            <span id="prediction-label" class="prediction-badge pending">Pending</span>
+                        </div>
+
+                        <div class="probability-section">
+                            <div class="probability-header">
+                                <span class="metric-title">Prediction Probability</span>
+                                <span id="malignant-value" class="metric-value">—</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="malignant-bar" class="progress-bar-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="meta-metrics-grid">
+                            <div class="metric-box">
+                                <span class="box-label">Confidence Score</span>
+                                <span id="confidence-value" class="box-value">—</span>
+                            </div>
+                            <div class="metric-box">
+                                <span class="box-label">Classes</span>
+                                <span class="box-value">{{ class_names | join(' / ') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="recommendation-box">
+                            <p id="recommendation-text"><strong>Recommendation:</strong> Upload an image and click Analyze to run classification.</p>
+                        </div>
+
+                        <div class="action-bar">
+                            <button type="submit" id="analyze-btn" class="btn-generate-report">Analyze Image</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+        </form>
+    </main>
+
+    <footer class="site-footer">
+        <span class="footer-left"><strong>OncoVision</strong> © 2026 OncoVision Health Systems. All rights reserved.</span>
+    </footer>
+
+    <script id="app-config" type="application/json">
+        {{ {"default_model": default_model, "loaded_models": loaded_models} | tojson }}
+    </script>
+    <script src="{{ url_for('static', filename='home.js') }}?v=3"></script>
+</body>
+</html>
